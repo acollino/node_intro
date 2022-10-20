@@ -1,7 +1,7 @@
 const fs = require("fs");
 const axios = require("axios");
 
-function cat(path) {
+function cat(path, output = null) {
   if (!path) {
     console.log("INVALID INPUT: Path to file is required.");
     process.exit(1);
@@ -11,20 +11,28 @@ function cat(path) {
         console.log(`Error reading ${path}:\n`, err);
         process.exit(1);
       } else {
-        console.log(data);
+        if (output) {
+          writeFile(output, data);
+        } else {
+          console.log(data);
+        }
       }
     });
   }
 }
 
-async function webCat(url) {
+async function webCat(url, output = null) {
   if (!url) {
     console.log("INVALID INPUT: A valid url is required.");
     process.exit(1);
   } else {
     try {
       let resp = await axios.get(url);
-      console.log(resp.data);
+      if (output) {
+        writeFile(output, resp.data);
+      } else {
+        console.log(resp.data);
+      }
     } catch (err) {
       console.log(`Error fetching ${url}:\n`, err.message);
       process.exit(1);
