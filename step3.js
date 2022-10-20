@@ -62,12 +62,23 @@ function writeFile(path, data) {
   });
 }
 
-if (process.argv[2] === "--out") {
-} else {
+function isURL(strToCheck) {
+  return strToCheck.match(/^http[s]?:\/\/\S+\.\S+$/);
 }
 
-if (process.argv[2].match(/^http[s]?:\/\/\S+\.\S+$/)) {
-  webCat(process.argv[2]);
+if (process.argv[2] === "--out") {
+  let outputFile = process.argv[3];
+  let inputStr = process.argv[4];
+  if (isURL(inputStr)) {
+    webCat(inputStr, outputFile);
+  } else {
+    cat(inputStr, outputFile);
+  }
 } else {
-  cat(process.argv[2]);
+  let inputStr = process.argv[2];
+  if (isURL(inputStr)) {
+    webCat(inputStr);
+  } else {
+    cat(inputStr);
+  }
 }
