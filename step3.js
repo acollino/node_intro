@@ -8,7 +8,7 @@ function cat(path, output = null) {
   } else {
     fs.readFile(path, "utf8", (err, data) => {
       if (err) {
-        console.log(`Error reading ${path}:\n`, err);
+        console.log(`Error reading ${path}:\n`, err.message);
         process.exit(1);
       } else {
         if (output) {
@@ -41,21 +41,25 @@ async function webCat(url, output = null) {
 }
 
 function writeFile(path, data) {
-  fs.open(path, (openError, fileID) => {
+  fs.open(path, "r+", (openError, fileID) => {
     if (openError) {
       console.log(`Couldn't access file at ${path}\n`, openError.message);
     } else {
+      fs.ftruncate(fileID, (truncError) => {
+        if (truncError) {
+          console.log(`Couldn't clear file at ${path}\n`, truncError.message);
+        }
+      });
       fs.write(fileID, data, { encoding: "utf8" }, (writeError) => {
         if (writeError) {
           console.log(`Couldn't write to ${path}\n`, writeError.message);
         } else {
-          fs.close(fileID, (closeError) => {
-            if (closeError) {
-              console.log("Error closing file\n", closeError.message);
-            } else {
-              console.log("Output written to file successfully.");
-            }
-          });
+          console.log("Output written to file successfully.");
+        }
+      });
+      fs.close(fileID, (closeError) => {
+        if (closeError) {
+          console.log("Error closing file\n", closeError.message);
         }
       });
     }
@@ -63,7 +67,7 @@ function writeFile(path, data) {
 }
 
 function isURL(strToCheck) {
-  return strToCheck.match(/^http[s]?:\/\/\S+\.\S+$/);
+  return strToCheck && strToCheck.match(/^http[s]?:\/\/\S+\.\S+$/);
 }
 
 if (process.argv[2] === "--out") {
