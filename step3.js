@@ -44,22 +44,27 @@ function writeFile(path, data) {
   fs.open(path, "r+", (openError, fileID) => {
     if (openError) {
       console.log(`Couldn't access file at ${path}\n`, openError.message);
+      process.exit(1);
     } else {
       fs.ftruncate(fileID, (truncError) => {
         if (truncError) {
           console.log(`Couldn't clear file at ${path}\n`, truncError.message);
-        }
-      });
-      fs.write(fileID, data, { encoding: "utf8" }, (writeError) => {
-        if (writeError) {
-          console.log(`Couldn't write to ${path}\n`, writeError.message);
+          process.exit(1);
         } else {
-          console.log("Output written to file successfully.");
-        }
-      });
-      fs.close(fileID, (closeError) => {
-        if (closeError) {
-          console.log("Error closing file\n", closeError.message);
+          fs.write(fileID, data, { encoding: "utf8" }, (writeError) => {
+            if (writeError) {
+              console.log(`Couldn't write to ${path}\n`, writeError.message);
+              process.exit(1);
+            } else {
+              console.log("Output written to file successfully.");
+              fs.close(fileID, (closeError) => {
+                if (closeError) {
+                  console.log("Error closing file\n", closeError.message);
+                  process.exit(1);
+                }
+              });
+            }
+          });
         }
       });
     }
